@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Project</title>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+      crossorigin=""
+    />
+    <!-- This ahould be AFTER Leaflet's CSS -->
+    <script
+      src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+      integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+      crossorigin=""
+    ></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      .leaflet-container {
+        height: 400px;
+        width: 700px;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="height: 400px; width: 700px" id="map"></div>
+    <script>
+
+        var myStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+        };
+
+      var map = L.map("map").setView([-25.75, 28.238096017450054], 15); 
+      var tiles = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 20,
+          attribution:
+            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }
+      ).addTo(map);
+
+      //Add the safety points dataset the web map as a WFS layer.
+      // Specify your root URL
+      var owsrootUrl = "http://geolive.co.za:8080/geoserver/Latitude/ows";
+
+      // Define your paramenters
+      var defaultParameters = {
+        service: "WFS",
+        version: "1.0.0",
+        request: "GetFeature",
+        typeName: "Latitude:SafteyPoints",
+        outputFormat: "text/javascript",
+        format_options: "callback:getJson",
+        SrsName: "EPSG:4326",
+      };
+      /* Combine all of this into a correctly formatted URL */
+      var parameters = L.Util.extend(defaultParameters);
+      var URL = owsrootUrl + L.Util.getParamString(parameters);
+
+      // create an empty layer
+      var WFSLayer = null;
+
+      // this is the ajax request, we are using the jsonp option
+      var ajax = $.ajax({
+        url: URL,
+        dataType: "jsonp",
+
+        /* this is the callback function that needs to run once the data is received, we are basically telling it to treat the data as a JSON */
+        jsonpCallback: "getJson",
+
+        /* if everything works fine, we do the success function, you can also add a error clause to execute if there was a problem */
+        success: function (response) {
+          WFSLayer = L.geoJson(response, {
+            style: myStyle,
+
+            onEachFeature: function (feature, featureLayer) {
+              featureLayer.on("click", function () {
+                featureLayer
+                  .bindPopup(`Safety Type: ${feature.properties["saftey type"]}`)
+                  .openPopup();
+              });
+              console.log(feature.properties);
+            },
+          }).addTo(map);
+
+          //layer control
+          var EsriWorldImagery = L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'",
+            { 
+              maxZoom: 20,
+              attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+             }
+          );
+
+          var baseMaps = { OSM: tiles, EsriWorldImage: EsriWorldImagery };
+          var layerControl = L.control.layers(baseMaps).addTo(map);
+        },
+      });
+    </script>
+  </body>
+</html>
