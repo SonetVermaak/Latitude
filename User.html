@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Responder</title>
+    <title>User</title>
     <meta charset="utf-8" />
     <link
       rel="stylesheet"
@@ -9,11 +9,7 @@
       integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
       crossorigin=""
     />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
-    <link rel="stylesheet" href="leaflet-routing-machine.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-
-    <!-- This ahould be AFTER Leaflet's CSS -->
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script
       src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
       integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
@@ -25,22 +21,60 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
       .leaflet-container {
         height: 400px;
         width: 1250px;
         max-width: 100%;
         max-height: 100%;
       }
-      
+      .button {
+          border: none;
+          color: white;
+          background-color: #e34a33;
+          padding: 20px 40px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          margin: 4px 2px;
+          cursor: pointer;
+          margin: 0;
+          position: absolute;
+          bottom: 20px;
+          left: 30px;
+          z-index: 400;
+        }
     </style>
   </head>
   <body>
-    <div style="height: 700px; width: 1250px" id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
-    <script src="leaflet-routing-machine.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-    <script>      
+    <div id="map"style="height: 700px; width: 1250px"></div>
+    <button id="helpbtn" class="button">HELP</button>
+  </body>
+    <script>
 
+    //Add function to help button
+    document.getElementById("helpbtn").onclick = function() {
+        const successCallback = (position) => {
+            console.log(position);
+            alert("Help is on the way!");
+        };
+
+        const errorCallback = (error) => {
+        console.log(error);
+        alert("An error occured, please try again.");
+        };
+
+    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+        };;
+
+      var svg = 'file:///C:/Users/Sonet/Downloads/safety-svgrepo-com.svg';
+      var iconUrl = 'data:image/svg+xml;base64,' + btoa(svg);
+      
       var map = L.map("map").setView([-25.75, 28.238096017450054], 15); 
       var tiles = L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -51,23 +85,11 @@
             '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }
       ).addTo(map);
-      
-        map.setMaxBounds(map.getBounds());
 
-        map.locate({setView: true, watch: true}) // This will return map so you can do chaining
-        .on('locationfound', function(e){
+      map.setMaxBounds(map.getBounds());
 
-        L.Routing.control({
-          waypoints: [
-              L.latLng(-25.7502876, 28.2335489),
-              L.latLng(-25.753442, 28.236450)
-          ],
-          //routeWhileDragging: true,
-          geocoder: L.Control.Geocoder.nominatim()
-        }).addTo(map);
-      })
 
-      //Add the safety points dataset the web map as a WFS layer.
+      //WFS
       // Specify your root URL
       var owsrootUrl = "http://geolive.co.za:8080/geoserver/Latitude/ows";
 
@@ -98,7 +120,7 @@
 
         /* if everything works fine, we do the success function, you can also add a error clause to execute if there was a problem */
         success: function (response) {
-          WFSLayer = L.geoJson(response, {
+            WFSLayer = L.geoJson(response, {
             //style: myStyle,
       
             pointToLayer: function(feature, latlng) {
@@ -135,9 +157,7 @@
 
           var baseMaps = { OSM: tiles, EsriWorldImage: EsriWorldImagery };
           var layerControl = L.control.layers(baseMaps).addTo(map);
-          
         },
       });
     </script>
-  </body>
 </html>

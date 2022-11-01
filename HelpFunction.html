@@ -41,16 +41,16 @@
         };;
 
     //
-    const pgp = require('pg-promise')
-    const db = pgp('postgres://postgres:aeG6chee@geolive.co.za:5432/sonet')
+    // const pgp = require('pg-promise')
+    // const db = pgp('postgres://postgres:aeG6chee@geolive.co.za:5432/sonet')
 
-    db.one('SELECT * FROM public."SafteyPoints"')
-    .then((data) => {
-        console.log('DATA:', data.value)
-    })
-    .catch((error) => {
-        console.log('ERROR:', error)
-    })
+    // db.one('SELECT * FROM public."SafteyPoints"')
+    // .then((data) => {
+    //     console.log('DATA:', data.value)
+    // })
+    // .catch((error) => {
+    //     console.log('ERROR:', error)
+    // })
 
 </script>
 </html>
